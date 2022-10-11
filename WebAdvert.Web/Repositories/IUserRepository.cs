@@ -7,5 +7,6 @@ namespace WebAdvert.Web.Repositories
     {
         Task<UserSignUpResponse> CreateUserAsync(SignupModel signupModel);
         Task<UserSignUpResponse> ConfirmUserSignUpAsync(UserConfirmSignUpModel model);
+        Task<AuthResponseModel> TryLoginAsync(LoginModel model);
     }
 }

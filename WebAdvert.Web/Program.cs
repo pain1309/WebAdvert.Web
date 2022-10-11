@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using WebAdvert.Web.Contracts;
@@ -13,6 +14,8 @@ builder.Services.AddCognitoIdentity();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserContextManager>();
 
 builder.Services.AddAuthentication(o =>
 {
@@ -23,6 +26,12 @@ builder.Services.AddAuthentication(o =>
 {
     options.Audience = "38vrcd61q1vda7cibnp49u9amr";
     options.Authority = "https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_vzPbt16Ai";
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.LoginPath = "/Accounts/Login";
+    options.LogoutPath = "/Accounts/Logout";
+    options.ReturnUrlParameter = "";
 });
 
 var app = builder.Build();

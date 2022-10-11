@@ -66,10 +66,19 @@ namespace WebAdvert.Web.Controllers
         [ActionName("Login")]
         public async Task<IActionResult> Login_Post(LoginModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-
+                return View();
             }
+
+            var response = await _userRepository.TryLoginAsync(model);
+
+            if (response.IsSuccess)
+            {
+                //_cache.Set<TokenModel>($"{response.UserId}_{Session_TokenKey}", response.Tokens);
+                return RedirectToAction("Index", "Home");
+            }
+
             return View(model);
         }
     }
