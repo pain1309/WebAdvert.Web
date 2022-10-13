@@ -84,7 +84,7 @@ namespace WebAdvert.Web.Repositories
             {
                 var result = await AuthenticateUserAsync(model.Email, model.Password);
 
-                if (result.Item1.Username != null)
+                if (result != null && result.Item1.Username != null)
                 {
                     await _userManager.SignIn(_httpContext, new Dictionary<string, string>() {
                         {ClaimTypes.Email, result.Item1.UserID},
@@ -199,6 +199,41 @@ namespace WebAdvert.Web.Repositories
                 Filter = $"email=\"{emailAddress}\""
             };
             return await _provider.ListUsersAsync(listUsersRequest);
+        }
+
+        public async Task<ForgotPasswordResponseModel> ForgotPasswordAsync(ForgotPasswordModel model)
+        {
+            ForgotPasswordResponseModel resModel = new();
+            ForgotPasswordRequest reqModel = new ForgotPasswordRequest()
+            {
+                ClientId = _cloudConfig.AppClientId,
+                Username = model.Email
+            };
+            await _provider.ForgotPasswordAsync(reqModel);
+            return resModel = new ForgotPasswordResponseModel()
+            {
+                IsSuccess = true,
+                Message = $"Mã code cho quên mật khẩu đã được gửi về email {model.Email}"
+            };
+        }
+
+        public async Task<ForgotPasswordResponseModel> ConfirmForgotPasswordAsync(ConfirmForgotPasswordModel model)
+        {
+            ForgotPasswordResponseModel resModel = new();
+            ConfirmForgotPasswordRequest reqModel = new ConfirmForgotPasswordRequest()
+            {
+                ClientId = _cloudConfig.AppClientId,
+                Username = model.Email,
+                Password = model.Password,
+                ConfirmationCode = model.ConfirmationCode
+            };
+            var respone = await _provider.ConfirmForgotPasswordAsync(reqModel);
+
+            return new ForgotPasswordResponseModel
+            {
+                Message = "User Confirmed",
+                IsSuccess = true
+            };
         }
     }
 }

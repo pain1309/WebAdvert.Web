@@ -76,10 +76,57 @@ namespace WebAdvert.Web.Controllers
             if (response.IsSuccess)
             {
                 //_cache.Set<TokenModel>($"{response.UserId}_{Session_TokenKey}", response.Tokens);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Get", "WeatherForecast");
             }
 
             return View(model);
+        }
+
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ActionName("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword_Post(ForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var response = await _userRepository.ForgotPasswordAsync(model);
+
+            if (response.IsSuccess)
+            {
+                return RedirectToAction("ConfirmForgotPassword");
+            }
+
+            return View(model);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmForgotPassword()
+        {
+            ConfirmForgotPasswordModel model = new();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ActionName("ConfirmForgotPassword")]
+        public async Task<IActionResult> ConfirmForgotPassword_Post(ConfirmForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var response = await _userRepository.ConfirmForgotPasswordAsync(model);
+
+            return View();
         }
     }
 }
