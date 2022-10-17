@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.Extensions.Http;
 using WebAdvert.Web.Contracts;
 using WebAdvert.Web.Repositories;
+using WebAdvert.Web.ServiceClients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,20 @@ builder.Services.AddAuthentication(o =>
     options.LogoutPath = "/Accounts/Logout";
     options.ReturnUrlParameter = "";
 });
+
+builder.Services.AddHttpClient<IAdvertApiClient, AdvertApiClient>().AddPolicyHandler(GetRetryPolicy())
+    .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
+
+IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPatternPolicy()
+{
+    return HttpPolicyExtensions.HandleTransientHttpError().CircuitBreakerAsync(3, TimeSpan.FromSeconds(30));
+}
+
+IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions.HandleTransientHttpError().OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+        .WaitAndRetryAsync(5, retryAttempy => TimeSpan.FromSeconds(Math.Pow(2, retryAttempy)));
+}
 
 var app = builder.Build();
 
