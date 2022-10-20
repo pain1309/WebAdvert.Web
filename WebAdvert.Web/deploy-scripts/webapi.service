@@ -1,0 +1,6 @@
+﻿[Unit]
+Description=.NET Dice Roll Web API
+
+[Service]
+WorkingDirectory=/var/www/
+ExecStart=/usr/bin/dotnet /var/www/WebAdvert.Web.dll
